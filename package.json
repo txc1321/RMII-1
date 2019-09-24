@@ -1,0 +1,30 @@
+{
+  "name": "http-api-assignment-ii",
+  "version": "1.0.0",
+  "engines": {
+    "node": "10.16.x",
+    "npm": "6.11.x"
+  },
+  "description": "",
+  "main": "./src/server.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "test": "echo \"No Tests\"",
+    "pretest": "eslint ./src --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txc1321/http-api-assignment-ii.git"
+  },
+  "author": "Tim Carter",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/txc1321/http-api-assignment-ii/issues"
+  },
+  "homepage": "https://github.com/txc1321/http-api-assignment-ii#readme",
+  "devDependencies": {
+    "eslint": "^6.4.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.18.2"
+  }
+}
