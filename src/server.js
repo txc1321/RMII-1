@@ -7,10 +7,6 @@ const jsonHandler = require('./jsonResponses');
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 // TODO:
-// - Send writes data to body and console, not redirect
-//   (getUsers, GET, empty and containing list; getUsers, HEAD; notReal, Get (404); notReal, HEAD)
-// - Add user with existing name: update body and fix error
-// - Direct call to any other url - notFound
 
 const handlePost = (request, response, parsedUrl) => {
   if (parsedUrl.pathname === '/addUser') {
@@ -31,7 +27,6 @@ const handlePost = (request, response, parsedUrl) => {
     request.on('end', () => {
       const bodyString = Buffer.concat(body).toString();
       const bodyParams = query.parse(bodyString);
-      console.dir(bodyString);
 
       jsonHandler.addUser(request, res, bodyParams);
     });
@@ -39,34 +34,16 @@ const handlePost = (request, response, parsedUrl) => {
 };
 
 const handleGet = (request, response, parsedUrl) => {
-  if (parsedUrl.pathname === '/getUsers') {
-    const res = response;
-
-    const body = [];
-
-    request.on('error', (err) => {
-      console.dir(err);
-      res.statusCode = 400;
-      res.end();
-    });
-
-    request.on('data', (chunk) => {
-      body.push(chunk);
-    });
-
-    request.on('end', () => {
-      const bodyString = Buffer.concat(body).toString();
-      const bodyParams = query.parse(bodyString);
-      console.dir(bodyString);
-
-      jsonHandler.getUsers(request, res, bodyParams);
-    });
-  }
-  else if (parsedUrl.pathname === '/style.css') {
-        htmlHandler.getCSS(request, response);
-  }
-  else {
+  if (parsedUrl.pathname === '/') {
     htmlHandler.getIndex(request, response);
+  } else if (parsedUrl.pathname === '/getUsers') {
+    jsonHandler.getUsers(request, response);
+  } else if (parsedUrl.pathname === '/notReal') {
+    jsonHandler.notFound(request, response);
+  } else if (parsedUrl.pathname === '/style.css') {
+    htmlHandler.getCSS(request, response);
+  } else {
+    jsonHandler.notFound(request, response);
   }
 };
 
@@ -75,10 +52,8 @@ const onRequest = (request, response) => {
 
   if (request.method === 'POST') {
     handlePost(request, response, parsedUrl);
-  } else if (request.method === 'GET') {
-    handleGet(request, response, parsedUrl);
   } else {
-    // notFound
+    handleGet(request, response, parsedUrl);
   }
 };
 

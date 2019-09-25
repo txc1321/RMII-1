@@ -11,25 +11,28 @@ const respondMeta = (request, response, status) => {
   response.end();
 };
 
-const getUsers = (request, response, body) => {
-  const responseJSON = {};
+const getUsers = (request, response) => {
+  const responseJSON = {
+    users,
+  };
 
-  if (body.method === 'HEAD') {
-    if (body.url === '/getUsers') {
-      return respondMeta(request, response, 200);
-    }
+  if (request.method === 'HEAD') {
+    return respondMeta(request, response, 200);
+  }
 
+  return respondJSON(request, response, 200, responseJSON);
+};
+
+const notFound = (request, response) => {
+  const responseJSON = {
+    id: 'notFound',
+    message: 'The page you are looking for was not found',
+  };
+
+  if (request.method === 'HEAD') {
     return respondMeta(request, response, 404);
   }
 
-  if (body.url === '/getUsers') {
-    console.dir("test");
-    responseJSON.users = users;
-    return respondJSON(request, response, 200, responseJSON);
-  }
-
-  responseJSON.id = 'notFound';
-  responseJSON.message = 'The page you are looking for was not found';
   return respondJSON(request, response, 404, responseJSON);
 };
 
@@ -65,4 +68,5 @@ const addUser = (request, response, body) => {
 module.exports = {
   getUsers,
   addUser,
+  notFound,
 };
