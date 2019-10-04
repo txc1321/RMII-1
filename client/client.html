@@ -11,6 +11,12 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
+    //TODO:
+    // - Sort tasks by date created
+    // - Sort tasks by date due
+    // - animation
+    // - limit date field by current date and a year out
+    // - Remember people by computer? Cache/cookies
     const parseJSON = (xhr, content) => {
       let removeTask;
       if (xhr.response) {
@@ -21,7 +27,9 @@
         }
 
         if (obj.tasks) {
-          //TODO: Makes a new element every time rather than update the old one
+          while(content.firstChild){
+            content.removeChild(content.firstChild);
+          }
           const taskList = document.createElement('div');
           taskList.className = "taskList";
 
@@ -50,11 +58,13 @@
             taskBox.appendChild(button);
 
             const taskText = document.createElement('span');
-            taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date;
+            taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date + " " + obj.tasks[task].time;
             taskBox.appendChild(taskText);
           }
 
           content.appendChild(taskList);
+
+          console.dir(JSON.stringify(obj.tasks));
         }
       }
     };
@@ -70,6 +80,7 @@
 
       const taskField = taskForm.querySelector('#taskField');
       const dateField = taskForm.querySelector('#dateField');
+      const timeField = taskForm.querySelector('#timeField');
 
       const xhr = new XMLHttpRequest();
       xhr.open(taskMethod, taskAction);
@@ -79,7 +90,7 @@
 
       xhr.onload = () => handleResponse(xhr);
 
-      const formData = `task=${taskField.value}&date=${dateField.value}`;
+      const formData = `task=${taskField.value}&date=${dateField.value}&time=${timeField.value}`;
 
       xhr.send(formData);
 
@@ -110,20 +121,16 @@
 
     const init = () => {
       const taskForm = document.querySelector('#taskForm');
-      const addTask = (e) => sendPost(e, taskForm);
+      const addTask = (e) => {
+        sendPost(e, taskForm);
+        sendAjax('/getTasks', 'GET');
+      }
       taskForm.addEventListener('submit', addTask);
-
 
       const inputs = document.querySelectorAll('.form-control');
       const inputTags = document.querySelectorAll('.input-group-text');
       const refreshButton = document.querySelector('#refreshButton');
       const styleButton = document.querySelector('#styleButton');
-
-      const handleClick = (e) => {
-        sendAjax('/getTasks', 'GET');
-      };
-
-      refreshButton.addEventListener('click', handleClick);
 
       let style = "Dark Mode";
 
@@ -212,8 +219,27 @@
         <input id="dateField" class="form-control" type="date" name="date" min="2019-10-03" max="2020-10-03" step="1"/>
       </div>
 
+      <div class="w-25 input-group mb-3 mx-auto">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon2">Time:</span>
+        </div>
+        <input id="timeField" class="form-control" type="time" name="time" step="1"/>
+      </div>
+
       <input id="taskSubmit" class="btn btn-primary" type="submit" value="Add Task" />
-      <input id="refreshButton" class="btn btn-primary" type="button" value="Refresh List" />
+
+      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-primary">
+          <input type="radio" name="options" id="sortLabel" autocomplete="off" disabled> Sort By:
+        </label>
+        <label class="btn btn-primary active">
+          <input type="radio" name="options" id="dateCreated"autocomplete="off" checked> Date Created
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options" id="dateDue" autocomplete="off"> Date Due
+        </label>
+      </div>
+
       <input id="styleButton" class="btn btn-primary" type="button" value="" />
     </form>
   </section>

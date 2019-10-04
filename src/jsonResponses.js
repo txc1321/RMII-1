@@ -56,6 +56,7 @@ const addTask = (request, response, body) => {
 
   tasks[body.task].task = body.task;
   tasks[body.task].date = body.date;
+  tasks[body.task].time = body.time;
 
   if (responseCode === 201) {
     responseJSON.message = 'Created Successfully';
