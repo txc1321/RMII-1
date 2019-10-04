@@ -37,8 +37,8 @@ html, body {
   display: inline;
 }
 
-#taskSubmit{
-
+#sortLabel{
+  border-right: 0px;
 }
 
 #title{

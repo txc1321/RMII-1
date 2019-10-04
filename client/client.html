@@ -144,7 +144,12 @@
           document.body.style.color = '#000000';
 
           for(let i = 0; i < buttons.length; i++){
-            if(buttons[i].classList.contains("taskButton")){
+            if(buttons[i].id === "sortLabel"){
+              buttons[i].classList.remove("border-light");
+              buttons[i].classList.add("border-dark");
+              buttons[i].style.color ='#000000';
+            }
+            else if(buttons[i].classList.contains("taskButton")){
               buttons[i].classList.remove("btn-outline-success");
               buttons[i].classList.add("btn-outline-primary");
               buttons[i].classList.remove("border-light");
@@ -171,7 +176,12 @@
           document.body.style.color = '#bbbbbb';
 
           for(let i = 0; i < buttons.length; i++){
-            if(buttons[i].classList.contains("taskButton")){
+            if(buttons[i].id === "sortLabel"){
+              buttons[i].classList.remove("border-dark");
+              buttons[i].classList.add("border-light");
+              buttons[i].style.color ='#FFFFFF';
+            }
+            else if(buttons[i].classList.contains("taskButton")){
               buttons[i].classList.remove("btn-outline-primary");
               buttons[i].classList.add("btn-outline-success");
               buttons[i].classList.remove("border-dark");
@@ -229,8 +239,8 @@
       <input id="taskSubmit" class="btn btn-primary" type="submit" value="Add Task" />
 
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-primary">
-          <input type="radio" name="options" id="sortLabel" autocomplete="off" disabled> Sort By:
+        <label class="btn border-dark" id="sortLabel" disabled>
+          <input type="radio" name="options" autocomplete="off"> Sort By:
         </label>
         <label class="btn btn-primary active">
           <input type="radio" name="options" id="dateCreated"autocomplete="off" checked> Date Created
