@@ -1,79 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
   <title>Our simple HTTP server</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     const parseJSON = (xhr, content) => {
-      if(xhr.response) {
+      let removeTask;
+      if (xhr.response) {
         const obj = JSON.parse(xhr.response);
-        console.dir(obj);
 
         if (obj.message) {
-          const p = document.createElement('p');
-          p.textContent = `Message: ${obj.message}`;
-          content.appendChild(p);
+          console.dir(obj.message);
         }
 
-        if (obj.users) {
-          const userList = document.createElement('p');
-          const users = JSON.stringify(obj.users);
-          userList.textContent = users;
-          content.appendChild(userList);
+        if (obj.tasks) {
+          //TODO: Makes a new element every time rather than update the old one
+          const taskList = document.createElement('div');
+          taskList.className = "taskList";
+
+          for (let task in obj.tasks) {
+            const taskBox = document.createElement('div');
+            taskBox.className = "taskBox";
+            taskBox.id = obj.tasks[task].task;
+            taskList.appendChild(taskBox);
+
+            const button = document.createElement('BUTTON');
+            button.className = "taskButton";
+
+            const style = document.querySelector('#styleButton').value;
+            if(style === "Light Mode"){
+              button.classList.add('btn', 'btn-outline-success', 'border', 'border-light');
+            }
+            else{
+              button.classList.add('btn', 'btn-outline-primary', 'border', 'border-dark');
+            }
+
+            button.addEventListener('click', removeTask = () => {
+              delete obj.tasks[button.parentNode.id];
+              postDelete('POST', '/deleteTask', button.parentNode.id);
+              button.parentNode.remove();
+            });
+            taskBox.appendChild(button);
+
+            const taskText = document.createElement('span');
+            taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date;
+            taskBox.appendChild(taskText);
+          }
+
+          content.appendChild(taskList);
         }
       }
     };
 
     const handleResponse = (xhr) => {
       const content = document.querySelector('#content');
-
-      switch (xhr.status) {
-        case 200:
-          content.innerHTML = `<b>Success</b>`;
-          break;
-        case 201:
-          content.innerHTML = `<b>Create</b>`;
-          break;
-        case 204:
-          content.innerHTML = `<b>Updated (No Content)</b>`;
-          break;
-        case 400:
-          content.innerHTML = `<b>Bad Request</b>`;
-          break;
-        case 404:
-          content.innerHTML = `<b>Resource Not Found</b>`;
-          break;
-        default:
-          content.innerHTML = `Error code not implemented by client`;
-          break;
-      }
-
       parseJSON(xhr, content);
     };
 
-    const sendPost = (e, nameForm) => {
-      const nameAction = nameForm.getAttribute('action');
-      const nameMethod = nameForm.getAttribute('method');
+    const sendPost = (e, taskForm) => {
+      const taskAction = taskForm.getAttribute('action');
+      const taskMethod = taskForm.getAttribute('method');
 
-      const nameField = nameForm.querySelector('#nameField');
-      const ageField = nameForm.querySelector('#ageField');
+      const taskField = taskForm.querySelector('#taskField');
+      const dateField = taskForm.querySelector('#dateField');
 
       const xhr = new XMLHttpRequest();
-      xhr.open(nameMethod, nameAction);
+      xhr.open(taskMethod, taskAction);
 
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader('Accept', 'application/json');
 
       xhr.onload = () => handleResponse(xhr);
 
-      const formData = `name=${nameField.value}&age=${ageField.value}`;
+      const formData = `task=${taskField.value}&date=${dateField.value}`;
 
       xhr.send(formData);
 
       e.preventDefault();
       return false;
+    };
+
+    const postDelete = (method, url, key) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url);
+
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('Accept', 'application/json');
+
+      const deleteData = `task=${key}`;
+
+      xhr.onload = () => handleResponse(xhr);
+      xhr.send(deleteData);
     };
 
     const sendAjax = (url, method) => {
@@ -85,22 +109,86 @@
     };
 
     const init = () => {
-      const nameForm = document.querySelector('#nameForm');
-      const addUser = (e) => sendPost(e, nameForm);
-      nameForm.addEventListener('submit', addUser);
+      const taskForm = document.querySelector('#taskForm');
+      const addTask = (e) => sendPost(e, taskForm);
+      taskForm.addEventListener('submit', addTask);
 
-      const userButton = document.querySelector('#userSubmit');
+
+      const inputs = document.querySelectorAll('.form-control');
+      const inputTags = document.querySelectorAll('.input-group-text');
+      const refreshButton = document.querySelector('#refreshButton');
+      const styleButton = document.querySelector('#styleButton');
 
       const handleClick = (e) => {
-        const urlField = document.querySelector('#urlField');
-        const methodField = document.querySelector('#methodSelect');
-
-        e.preventDefault();
-
-        sendAjax(urlField.value, methodField.value);
+        sendAjax('/getTasks', 'GET');
       };
 
-      userButton.addEventListener('click', handleClick);
+      refreshButton.addEventListener('click', handleClick);
+
+      let style = "Dark Mode";
+
+      styleButton.value = style;
+
+      const changeStyle = (e) => {
+        const buttons = document.querySelectorAll('.btn');
+
+        if(styleButton.value === "Light Mode"){
+          document.body.style.backgroundColor = '#FFFFFF';
+          document.body.style.color = '#000000';
+
+          for(let i = 0; i < buttons.length; i++){
+            if(buttons[i].classList.contains("taskButton")){
+              buttons[i].classList.remove("btn-outline-success");
+              buttons[i].classList.add("btn-outline-primary");
+              buttons[i].classList.remove("border-light");
+              buttons[i].classList.add("border-dark");
+            }
+            else{
+              buttons[i].classList.remove("btn-success");
+              buttons[i].classList.add("btn-primary");
+            }
+          }
+
+          for(let i = 0; i < inputs.length; i++){
+            inputs[i].style.backgroundColor = '#FFFFFF';
+            inputs[i].style.color ='#495057';
+            inputTags[i].style.backgroundColor = '#E9ECEF';
+            inputTags[i].style.color = '#495057'
+          }
+
+          style = "Dark Mode";
+          styleButton.value = style;
+        }
+        else{
+          document.body.style.backgroundColor = '#2b2b2b';
+          document.body.style.color = '#bbbbbb';
+
+          for(let i = 0; i < buttons.length; i++){
+            if(buttons[i].classList.contains("taskButton")){
+              buttons[i].classList.remove("btn-outline-primary");
+              buttons[i].classList.add("btn-outline-success");
+              buttons[i].classList.remove("border-dark");
+              buttons[i].classList.add("border-light");
+            }
+            else{
+              buttons[i].classList.remove("btn-primary");
+              buttons[i].classList.add("btn-success");
+            }
+          }
+
+          for(let i = 0; i < inputs.length; i++){
+            inputs[i].style.backgroundColor = '#595b5d';
+            inputs[i].style.color ='#bbbbbb';
+            inputTags[i].style.backgroundColor = '#323232';
+            inputTags[i].style.color = '#bbbbbb'
+          }
+
+          style = "Light Mode";
+          styleButton.value = style;
+        }
+      };
+
+      styleButton.addEventListener('click', changeStyle);
     };
 
     window.onload = init;
@@ -108,27 +196,32 @@
 </head>
 <body>
   <section id="top">
-    <h3>POST Status Code Tests</h3>
-    <form id="nameForm" action="/addUser" method="post">
-      <label for="name">Name: </label>
-      <input id="nameField" type="text" name="name" />
-      <label for="age">Age: </label>
-      <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
-      <input type="submit" value="Add User" />
-    </form>
-    <form id="userForm" action="/getUsers" method="get">
-      <select id='urlField'>
-        <option value='/getUsers'>/getUsers</option>
-        <option value='/notReal'>/notReal</option>
-      </select>
-      <select id="methodSelect">
-        <option value="get">GET</option>
-        <option value="head">HEAD</option>
-      </select>
-      <input id="userSubmit" type="submit" value="Get Users" />
+    <h3 id="title">Lister</h3>
+    <form id="taskForm"action="/addTask" method="post">
+      <div class="w-25 input-group mb-3 mx-auto">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon1">Task:</span>
+        </div>
+        <input id="taskField" class="form-control" type="text" name="task" />
+      </div>
+
+      <div class="w-25 input-group mb-3 mx-auto">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon2">Due Date:</span>
+        </div>
+        <input id="dateField" class="form-control" type="date" name="date" min="2019-10-03" max="2020-10-03" step="1"/>
+      </div>
+
+      <input id="taskSubmit" class="btn btn-primary" type="submit" value="Add Task" />
+      <input id="refreshButton" class="btn btn-primary" type="button" value="Refresh List" />
+      <input id="styleButton" class="btn btn-primary" type="button" value="" />
     </form>
   </section>
   <section id="content">
   </section>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </body>
 </html>

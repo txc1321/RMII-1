@@ -19,3 +19,28 @@ html, body {
   font-size: 2em;
   text-align: center;
 }
+
+.taskButton{
+  display: inline;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  margin-right: 25px;
+  margin-top: -1px;
+}
+
+.taskBox{
+  margin-bottom: 10px;
+}
+
+#refreshButton{
+  display: inline;
+}
+
+#taskSubmit{
+
+}
+
+#title{
+  padding-top: 10px;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "http-api-assignment-ii",
+  "name": "api-project",
   "version": "1.0.0",
   "engines": {
     "node": "10.16.x",
@@ -8,7 +8,7 @@
   "description": "",
   "main": "./src/server.js",
   "scripts": {
-    "nodemon": "nodemon --watch ./src --watch ./client ./src/server.js",
+    "nodemon": "nodemon -e js,html,css --watch ./src --watch ./client ./src/server.js",
     "start": "node ./src/server.js",
     "test": "echo \"No Tests\"",
     "pretest": "eslint ./src --fix"

@@ -1,4 +1,4 @@
-const users = {};
+const tasks = {};
 
 const respondJSON = (request, response, status, object) => {
   response.writeHead(status, { 'Content-Type': 'application/json' });
@@ -11,9 +11,9 @@ const respondMeta = (request, response, status) => {
   response.end();
 };
 
-const getUsers = (request, response) => {
+const getTasks = (request, response) => {
   const responseJSON = {
-    users,
+    tasks,
   };
 
   if (request.method === 'HEAD') {
@@ -36,26 +36,26 @@ const notFound = (request, response) => {
   return respondJSON(request, response, 404, responseJSON);
 };
 
-const addUser = (request, response, body) => {
+const addTask = (request, response, body) => {
   const responseJSON = {
-    message: 'Name and age are both required',
+    message: 'Task is required',
   };
 
-  if (!body.name || !body.age) {
+  if (!body.task) {
     responseJSON.id = 'missingParams';
     return respondJSON(request, response, 400, responseJSON);
   }
 
   let responseCode = 201;
 
-  if (users[body.name]) {
+  if (tasks[body.task]) {
     responseCode = 204;
   } else {
-    users[body.name] = {};
+    tasks[body.task] = {};
   }
 
-  users[body.name].name = body.name;
-  users[body.name].age = body.age;
+  tasks[body.task].task = body.task;
+  tasks[body.task].date = body.date;
 
   if (responseCode === 201) {
     responseJSON.message = 'Created Successfully';
@@ -65,8 +65,22 @@ const addUser = (request, response, body) => {
   return respondMeta(request, response, responseCode);
 };
 
+const deleteTask = (request, response, body) => {
+  const responseJSON = {
+      tasks,
+  };
+
+  const deleteKey = body.task;
+  delete tasks[deleteKey];
+
+  responseJSON.message = 'Deleted Successfully';
+
+  return respondJSON(request, response, 200, responseJSON)
+};
+
 module.exports = {
-  getUsers,
-  addUser,
+  getTasks,
+  addTask,
+  deleteTask,
   notFound,
 };

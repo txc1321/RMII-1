@@ -9,7 +9,7 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 // TODO:
 
 const handlePost = (request, response, parsedUrl) => {
-  if (parsedUrl.pathname === '/addUser') {
+
     const res = response;
 
     const body = [];
@@ -27,19 +27,20 @@ const handlePost = (request, response, parsedUrl) => {
     request.on('end', () => {
       const bodyString = Buffer.concat(body).toString();
       const bodyParams = query.parse(bodyString);
-
-      jsonHandler.addUser(request, res, bodyParams);
+      if (parsedUrl.pathname === '/addTask') {
+        jsonHandler.addTask(request, res, bodyParams);
+      }
+      else if(parsedUrl.pathname === '/deleteTask'){
+        jsonHandler.deleteTask(request, res, bodyParams);
+      }
     });
-  }
 };
 
 const handleGet = (request, response, parsedUrl) => {
   if (parsedUrl.pathname === '/') {
     htmlHandler.getIndex(request, response);
-  } else if (parsedUrl.pathname === '/getUsers') {
-    jsonHandler.getUsers(request, response);
-  } else if (parsedUrl.pathname === '/notReal') {
-    jsonHandler.notFound(request, response);
+  } else if (parsedUrl.pathname === '/getTasks') {
+    jsonHandler.getTasks(request, response);
   } else if (parsedUrl.pathname === '/style.css') {
     htmlHandler.getCSS(request, response);
   } else {
