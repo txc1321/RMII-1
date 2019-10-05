@@ -58,6 +58,9 @@ const addTask = (request, response, body) => {
   tasks[body.task].date = body.date;
   tasks[body.task].time = body.time;
 
+  const date = new Date();
+  tasks[body.task].timestamp = date.getTime();
+
   if (responseCode === 201) {
     responseJSON.message = 'Created Successfully';
     return respondJSON(request, response, responseCode, responseJSON);
@@ -79,9 +82,86 @@ const deleteTask = (request, response, body) => {
   return respondJSON(request, response, 200, responseJSON)
 };
 
+const orderTasks = (request, response, body) => {
+  const responseJSON = {
+    tasks,
+  };
+
+  const orderVal = body.order;
+
+  //grabs all tasks and arrays them to be ordered
+  const unsortedItems = [];
+    for(let task in tasks){
+      unsortedItems.push(task);
+    }
+
+  const orderByDate = (arr, prop) => {
+    //Part of this code snippet was adapted from a stackexchange answer by Thomas Reggi
+    //Answer URL: https://codereview.stackexchange.com/questions/104170/order-array-of-objects-by-date-property
+    const unsortableTasks = [];
+
+    if(prop === "date") {
+      for (let task in arr) {
+        if (!task.date) {
+          unsortableTasks.push(task);
+          arr.delete(task);
+        }
+      }
+
+      const sortedItems = arr.slice().sort((a, b) => {
+        //checks what to order tasks by
+        const aDateString = a.date + "T";
+        const bDateString = b.date + "T";
+        //handles if there is missing time
+        if(a.time){
+          aDateString.concat(a.time);
+        }
+        else{
+          aDateString.concat("00:00:01");
+        }
+        if(b.time){
+          bDateString.concat(b.time);
+        }
+        else{
+          bDateString.concat("00:00:01");
+        }
+        return new Date(aDateString) < new Date(bDateString) ? -1 : 1;
+      });
+
+      return unsortableItems.concat(sortedItems);
+
+    }
+    else if(prop === "timestamp"){
+      const sortedItems = arr.slice().sort((a, b) => {
+        return a.timestamp < b.timestamp ? -1 : 1;
+      });
+
+      return unsortableItems.concat(sortedItems);
+    }
+
+    return unsortableItems;
+  };
+
+  let newItems = [];
+
+  if(orderVal > 0){
+    newItems = orderByDate(unsortedItems, "date");
+  }
+  else{
+    newItems = orderByDate(unsortedItems, "timestamp");
+  }
+
+  
+
+  responseJSON.message = 'Ordered Successfully';
+
+  return respondJSON(request, response, 200, responseJSON);
+};
+
 module.exports = {
   getTasks,
   addTask,
   deleteTask,
+  orderTasks,
   notFound,
 };

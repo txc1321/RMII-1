@@ -33,6 +33,9 @@ const handlePost = (request, response, parsedUrl) => {
       else if(parsedUrl.pathname === '/deleteTask'){
         jsonHandler.deleteTask(request, res, bodyParams);
       }
+      else if(parsedUrl.pathname === '/orderTasks'){
+        jsonHandler.orderTasks(request, res, bodyParams);
+      }
     });
 };
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>Our simple HTTP server</title>
+  <title>Lister</title>
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="/style.css">
@@ -12,11 +12,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     //TODO:
-    // - Sort tasks by date created
     // - Sort tasks by date due
     // - animation
-    // - limit date field by current date and a year out
-    // - Remember people by computer? Cache/cookies
     const parseJSON = (xhr, content) => {
       let removeTask;
       if (xhr.response) {
@@ -27,7 +24,7 @@
         }
 
         if (obj.tasks) {
-          while(content.firstChild){
+          while (content.firstChild) {
             content.removeChild(content.firstChild);
           }
           const taskList = document.createElement('div');
@@ -43,10 +40,9 @@
             button.className = "taskButton";
 
             const style = document.querySelector('#styleButton').value;
-            if(style === "Light Mode"){
+            if (style === "Light Mode") {
               button.classList.add('btn', 'btn-outline-success', 'border', 'border-light');
-            }
-            else{
+            } else {
               button.classList.add('btn', 'btn-outline-primary', 'border', 'border-dark');
             }
 
@@ -61,7 +57,6 @@
             taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date + " " + obj.tasks[task].time;
             taskBox.appendChild(taskText);
           }
-
           content.appendChild(taskList);
 
           console.dir(JSON.stringify(obj.tasks));
@@ -111,6 +106,19 @@
       xhr.send(deleteData);
     };
 
+    const postOrder =  (method, url, value) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url);
+
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('Accept', 'application/json');
+
+      const orderData = `order=${value}`;
+
+      xhr.onload = () => handleResponse(xhr);
+      xhr.send(orderData);
+    };
+
     const sendAjax = (url, method) => {
       const xhr = new XMLHttpRequest();
       xhr.open(method, url);
@@ -124,12 +132,30 @@
       const addTask = (e) => {
         sendPost(e, taskForm);
         sendAjax('/getTasks', 'GET');
-      }
+      };
+
       taskForm.addEventListener('submit', addTask);
+
+      const createSortButton = document.querySelector('#dateCreated');
+      const dateSortButton = document.querySelector('#dateDue');
+
+      const handleSort = (e) => {
+        const target = e.target;
+        if(target.id === "dateCreated"){
+          postOrder('POST', '/orderTasks', 0);
+          sendAjax('/getTasks', 'GET');
+        }
+        else{
+          postOrder('POST', '/orderTasks', 1);
+          sendAjax('/getTasks', 'GET');
+        }
+      };
+
+      dateSortButton.addEventListener('click', handleSort);
+      createSortButton.addEventListener('click', handleSort);
 
       const inputs = document.querySelectorAll('.form-control');
       const inputTags = document.querySelectorAll('.input-group-text');
-      const refreshButton = document.querySelector('#refreshButton');
       const styleButton = document.querySelector('#styleButton');
 
       let style = "Dark Mode";
@@ -144,7 +170,7 @@
           document.body.style.color = '#000000';
 
           for(let i = 0; i < buttons.length; i++){
-            if(buttons[i].id === "sortLabel"){
+            if(buttons[i].id === "dateLabel"){
               buttons[i].classList.remove("border-light");
               buttons[i].classList.add("border-dark");
               buttons[i].style.color ='#000000';
@@ -176,7 +202,7 @@
           document.body.style.color = '#bbbbbb';
 
           for(let i = 0; i < buttons.length; i++){
-            if(buttons[i].id === "sortLabel"){
+            if(buttons[i].id === "dateLabel"){
               buttons[i].classList.remove("border-dark");
               buttons[i].classList.add("border-light");
               buttons[i].style.color ='#FFFFFF';
@@ -226,7 +252,7 @@
         <div class="input-group-prepend">
           <span class="input-group-text" id="basic-addon2">Due Date:</span>
         </div>
-        <input id="dateField" class="form-control" type="date" name="date" min="2019-10-03" max="2020-10-03" step="1"/>
+        <input id="dateField" class="form-control" type="date" name="date" step="1"/>
       </div>
 
       <div class="w-25 input-group mb-3 mx-auto">
@@ -238,15 +264,15 @@
 
       <input id="taskSubmit" class="btn btn-primary" type="submit" value="Add Task" />
 
-      <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn border-dark" id="sortLabel" disabled>
+      <div id="sortButtons" class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn border-dark" id="dateLabel" disabled>
           <input type="radio" name="options" autocomplete="off"> Sort By:
         </label>
-        <label class="btn btn-primary active">
-          <input type="radio" name="options" id="dateCreated"autocomplete="off" checked> Date Created
+        <label class="btn btn-primary active" id="dateCreated">
+          <input type="radio" name="options" autocomplete="off" checked> Date Created
         </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options" id="dateDue" autocomplete="off"> Date Due
+        <label class="btn btn-primary" id="dateDue">
+          <input type="radio" name="options"  autocomplete="off"> Date Due
         </label>
       </div>
 
