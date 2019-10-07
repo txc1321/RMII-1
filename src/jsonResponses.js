@@ -89,11 +89,12 @@ const orderTasks = (request, response, body) => {
 
   const orderVal = body.order;
 
-  //grabs all tasks and arrays them to be ordered
   const unsortedItems = [];
-    for(let task in tasks){
-      unsortedItems.push(task);
-    }
+
+  //grabs all tasks and arrays them to be ordered
+  for(let task in tasks){
+    unsortedItems.push(tasks[task]);
+  }
 
   const orderByDate = (arr, prop) => {
     //Part of this code snippet was adapted from a stackexchange answer by Thomas Reggi
@@ -104,54 +105,56 @@ const orderTasks = (request, response, body) => {
       for (let task in arr) {
         if (!task.date) {
           unsortableTasks.push(task);
-          arr.delete(task);
+          arr.splice(arr.indexOf(task), 1);
         }
       }
 
-      const sortedItems = arr.slice().sort((a, b) => {
+      const sortedItems = arr.sort((a, b) => {
         //checks what to order tasks by
-        const aDateString = a.date + "T";
-        const bDateString = b.date + "T";
+        const aDateString = a.date;
+        const bDateString = b.date;
         //handles if there is missing time
         if(a.time){
           aDateString.concat(a.time);
         }
         else{
-          aDateString.concat("00:00:01");
+          aDateString.concat("T", "00:00:01");
         }
         if(b.time){
           bDateString.concat(b.time);
         }
         else{
-          bDateString.concat("00:00:01");
+          bDateString.concat("T", "00:00:01");
         }
-        return new Date(aDateString) < new Date(bDateString) ? -1 : 1;
+        console.dir(aDateString);
+        console.dir(aDateString);
+        return new Date(aDateString) > new Date(bDateString) ? -1 : new Date(aDateString) < new Date(bDateString) ? 1 : 0;
       });
 
-      return unsortableItems.concat(sortedItems);
-
+      return unsortableTasks.concat(sortedItems);
     }
-    else if(prop === "timestamp"){
-      const sortedItems = arr.slice().sort((a, b) => {
+    else{
+      return sortedItems = arr.slice().sort((a, b) => {
         return a.timestamp < b.timestamp ? -1 : 1;
       });
-
-      return unsortableItems.concat(sortedItems);
     }
-
-    return unsortableItems;
   };
 
-  let newItems = [];
+  let newTasks = [];
 
   if(orderVal > 0){
-    newItems = orderByDate(unsortedItems, "date");
+    newTasks = orderByDate(unsortedItems, "date");
   }
   else{
-    newItems = orderByDate(unsortedItems, "timestamp");
+    newTasks = orderByDate(unsortedItems, "timestamp");
   }
 
-  
+  const updatedTasks = {};
+  for(let i = 0; i < newTasks.length; i++){
+    updatedTasks[`${newTasks[i].task}`] = newTasks[i];
+  }
+
+  responseJSON.tasks = updatedTasks;
 
   responseJSON.message = 'Ordered Successfully';
 
