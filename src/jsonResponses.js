@@ -106,10 +106,12 @@ const orderTasks = (request, response, body) => {
     const unsortableTasks = [];
 
     if (prop === 'date') {
-      for (const task in arr) {
-        if (!task.date) {
-          unsortableTasks.push(task);
-          arr.splice(arr.indexOf(task), 1);
+      for (let i = 0; i < arr.length; i++) {
+        console.dir(arr[i]);
+        if (!arr[i].date) {
+          console.dir("item sent to unsortable");
+          unsortableTasks.push(arr[i]);
+          arr.splice(i, 1);
         }
       }
 
@@ -138,8 +140,13 @@ const orderTasks = (request, response, body) => {
 
         return 0;
       });
-
-      return unsortableTasks.concat(sortedItems);
+      if(unsortableTasks.length > 0){
+        const combinedItems = [...unsortableTasks, ...sortedItems];
+        return combinedItems;
+      }
+      else{
+        return sortedItems;
+      }
     }
 
     const sortedItems = arr.slice().sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1));

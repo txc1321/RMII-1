@@ -62,6 +62,15 @@
             taskBox.appendChild(button);
 
             const taskText = document.createElement('span');
+            if(obj.tasks[task].date){
+              taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date + " " + obj.tasks[task].time;
+            }
+            else if(obj.tasks[task].time){
+              taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].time;
+            }
+            else{
+              taskText.textContent = obj.tasks[task].task;
+            }
             taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date + " " + obj.tasks[task].time;
             taskBox.appendChild(taskText);
           }
