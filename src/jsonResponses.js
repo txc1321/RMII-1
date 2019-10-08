@@ -115,13 +115,13 @@ const orderTasks = (request, response, body) => {
         const bDateString = b.date;
         //handles if there is missing time
         if(a.time){
-          aDateString.concat(a.time);
+          aDateString.concat("T", a.time);
         }
         else{
           aDateString.concat("T", "00:00:01");
         }
         if(b.time){
-          bDateString.concat(b.time);
+          bDateString.concat("T", b.time);
         }
         else{
           bDateString.concat("T", "00:00:01");
