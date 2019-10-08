@@ -109,7 +109,7 @@ const orderTasks = (request, response, body) => {
         }
       }
 
-      const sortedItems = arr.sort((a, b) => {
+      const sortedItems = arr.slice().sort((a, b) => {
         //checks what to order tasks by
         const aDateString = a.date;
         const bDateString = b.date;
