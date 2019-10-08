@@ -9,34 +9,31 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 // TODO:
 
 const handlePost = (request, response, parsedUrl) => {
+  const res = response;
 
-    const res = response;
+  const body = [];
 
-    const body = [];
+  request.on('error', (err) => {
+    console.dir(err);
+    res.statusCode = 400;
+    res.end();
+  });
 
-    request.on('error', (err) => {
-      console.dir(err);
-      res.statusCode = 400;
-      res.end();
-    });
+  request.on('data', (chunk) => {
+    body.push(chunk);
+  });
 
-    request.on('data', (chunk) => {
-      body.push(chunk);
-    });
-
-    request.on('end', () => {
-      const bodyString = Buffer.concat(body).toString();
-      const bodyParams = query.parse(bodyString);
-      if (parsedUrl.pathname === '/addTask') {
-        jsonHandler.addTask(request, res, bodyParams);
-      }
-      else if(parsedUrl.pathname === '/deleteTask'){
-        jsonHandler.deleteTask(request, res, bodyParams);
-      }
-      else if(parsedUrl.pathname === '/orderTasks'){
-        jsonHandler.orderTasks(request, res, bodyParams);
-      }
-    });
+  request.on('end', () => {
+    const bodyString = Buffer.concat(body).toString();
+    const bodyParams = query.parse(bodyString);
+    if (parsedUrl.pathname === '/addTask') {
+      jsonHandler.addTask(request, res, bodyParams);
+    } else if (parsedUrl.pathname === '/deleteTask') {
+      jsonHandler.deleteTask(request, res, bodyParams);
+    } else if (parsedUrl.pathname === '/orderTasks') {
+      jsonHandler.orderTasks(request, res, bodyParams);
+    }
+  });
 };
 
 const handleGet = (request, response, parsedUrl) => {
