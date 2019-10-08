@@ -107,9 +107,8 @@ const orderTasks = (request, response, body) => {
 
     if (prop === 'date') {
       for (let i = 0; i < arr.length; i++) {
-        console.dir(arr[i]);
         if (!arr[i].date) {
-          console.dir("item sent to unsortable");
+          console.dir('item sent to unsortable');
           unsortableTasks.push(arr[i]);
           arr.splice(i, 1);
         }
@@ -121,14 +120,14 @@ const orderTasks = (request, response, body) => {
         let bDateString = b.date;
         // handles if there is missing time
         if (a.time) {
-          aDateString = aDateString + "T" + a.time;
+          aDateString = `${aDateString}T${a.time}`;
         } else {
-          aDateString = aDateString + "T00:00:01";
+          aDateString += 'T00:00:01';
         }
         if (b.time) {
-          bDateString = bDateString + "T" + b.time;
+          bDateString = `${bDateString}T${b.time}`;
         } else {
-          bDateString = bDateString + "T00:00:01";
+          bDateString += 'T00:00:01';
         }
 
         if (new Date(aDateString) < new Date(bDateString)) {
@@ -140,13 +139,12 @@ const orderTasks = (request, response, body) => {
 
         return 0;
       });
-      if(unsortableTasks.length > 0){
+      if (unsortableTasks.length > 0) {
         const combinedItems = [...unsortableTasks, ...sortedItems];
         return combinedItems;
       }
-      else{
-        return sortedItems;
-      }
+
+      return sortedItems;
     }
 
     const sortedItems = arr.slice().sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1));
