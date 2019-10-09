@@ -12,7 +12,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     //TODO:
-    // - 500 code (if required)
     // - GET with parameters
     // - Comment code
     // --- Extra ---
@@ -72,8 +71,6 @@
             taskBox.appendChild(taskText);
           }
           content.appendChild(taskList);
-
-          //console.dir(JSON.stringify(obj));
         }
       }
     };
@@ -97,7 +94,14 @@
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader('Accept', 'application/json');
 
-      xhr.onload = () => handleResponse(xhr);
+      const callback = (xhr) => {
+        handleResponse(xhr);
+        if(xhr.status === 200 || xhr.status === 201 || xhr.status === 204) {
+          sendAjax('/getTasks', 'GET');
+        }
+      }
+      
+      xhr.onload = () => callback(xhr);
 
       const formData = `task=${taskField.value}&date=${dateField.value}&time=${timeField.value}`;
 
@@ -145,7 +149,6 @@
       const taskForm = document.querySelector('#taskForm');
       const addTask = (e) => {
         sendPost(e, taskForm);
-        sendAjax('/getTasks', 'GET');
       };
 
       taskForm.addEventListener('submit', addTask);
@@ -262,7 +265,7 @@
 
       <div class="w-25 input-group mb-3 mx-auto">
         <div class="input-group-prepend">
-          <span class="input-group-text" id="basic-addon2">Due Date:</span>
+          <span class="input-group-text" id="basic-addon2">Date:</span>
         </div>
         <input id="dateField" class="form-control" type="date" name="date" step="1"/>
       </div>
@@ -281,10 +284,10 @@
           <input type="radio" name="options" autocomplete="off"> Sort By:
         </label>
         <label class="btn btn-primary active" id="dateCreated">
-          <input type="radio" name="options" autocomplete="off" checked> Date Created
+          <input type="radio" name="options" autocomplete="off" checked> Created
         </label>
         <label class="btn btn-primary" id="dateDue">
-          <input type="radio" name="options"  autocomplete="off"> Date Due
+          <input type="radio" name="options"  autocomplete="off"> Due
         </label>
       </div>
 
