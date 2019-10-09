@@ -95,9 +95,11 @@ const orderTasks = (request, response, body) => {
 
   const unsortedItems = [];
 
+  const keys = Object.keys(tasks);
+
   // grabs all tasks and arrays them to be ordered
-  for (const task in tasks) {
-    unsortedItems.push(tasks[task]);
+  for (let i = 0; i < keys.length; i++) {
+    unsortedItems.push(tasks[keys[i]]);
   }
 
   const orderByDate = (arr, prop) => {
