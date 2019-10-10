@@ -20,6 +20,7 @@ html, body {
   text-align: center;
 }
 
+/*Additional styling to overwrite bootstrap styling in certain instances*/
 .taskButton{
   display: inline;
   width: 25px;
@@ -38,7 +39,7 @@ html, body {
 }
 
 #sortLabel{
-  border-right: 0px;
+  border-right: 0;
 }
 
 #title{

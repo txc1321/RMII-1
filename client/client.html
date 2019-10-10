@@ -5,44 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <title>Lister</title>
-
+  <!--Adds in bootstrap styling before internal styling-->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     //TODO:
-    // - GET with parameters
-    // - Comment code
+    // - Hi Austin, hope you had a good birthday :)
     // --- Extra ---
     // - animation
     // - Cookies/same user
+
+    //function to parse xhr response
     const parseJSON = (xhr, content) => {
+      //creates a variable for a function further in
       let removeTask;
+
       if (xhr.response) {
         const obj = JSON.parse(xhr.response);
 
+        //consoles out any JSON messages and status codes
         if (obj.message) {
           console.dir(obj.message);
           console.dir(xhr.status);
         }
 
         if (obj.tasks) {
+          //clears the content section every time a new response arrives
           while (content.firstChild) {
             content.removeChild(content.firstChild);
           }
+
+          //creates a new element to contain response data
           const taskList = document.createElement('div');
           taskList.className = "taskList";
 
+          //for..ins through the tasks from the response
           for (let task in obj.tasks) {
+            //creates a new html element for each task with an id of the task name
             const taskBox = document.createElement('div');
             taskBox.className = "taskBox";
             taskBox.id = obj.tasks[task].task;
+            //adds new html element to task container element
             taskList.appendChild(taskBox);
 
+            //creates a button within task html element
             const button = document.createElement('BUTTON');
             button.className = "taskButton";
 
+            //styles button based on current style setting
             const style = document.querySelector('#styleButton').value;
             if (style === "Light Mode") {
               button.classList.add('btn', 'btn-outline-success', 'border', 'border-light');
@@ -50,24 +62,33 @@
               button.classList.add('btn', 'btn-outline-primary', 'border', 'border-dark');
             }
 
+            //adds a listener to the button to remove the item if clicked
             button.addEventListener('click', removeTask = () => {
+              //removes from local json
               delete obj.tasks[button.parentNode.id];
+              //sends POST request to the server to delete item
               postDelete('POST', '/deleteTask', button.parentNode.id);
+              //removes from html
               button.parentNode.remove();
             });
             taskBox.appendChild(button);
 
+            //creates an html element to list out task data
             const taskText = document.createElement('span');
             if(obj.tasks[task].date){
+              //list for if date data is included
               taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date + " " + obj.tasks[task].time;
             }
             else if(obj.tasks[task].time){
+              //list for if no date data but time data
+              //sorting depends on a date being there, does not sort by time only
+              // ^ assumes if no date is added then taks must be due current day
               taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].time;
             }
             else{
+              //list for if no time or date data
               taskText.textContent = obj.tasks[task].task;
             }
-            taskText.textContent = obj.tasks[task].task + " | Due: " + obj.tasks[task].date + " " + obj.tasks[task].time;
             taskBox.appendChild(taskText);
           }
           content.appendChild(taskList);
@@ -75,12 +96,17 @@
       }
     };
 
+    //function to handle xhr response
     const handleResponse = (xhr) => {
+      //identifies content section
       const content = document.querySelector('#content');
+      //calls parse function, passing in content
       parseJSON(xhr, content);
     };
 
+    //function to send form data to the server
     const sendPost = (e, taskForm) => {
+      //retrieves form action, method, and fields
       const taskAction = taskForm.getAttribute('action');
       const taskMethod = taskForm.getAttribute('method');
 
@@ -88,120 +114,168 @@
       const dateField = taskForm.querySelector('#dateField');
       const timeField = taskForm.querySelector('#timeField');
 
+      //creates a new xhr request
       const xhr = new XMLHttpRequest();
       xhr.open(taskMethod, taskAction);
 
+      //set headers
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader('Accept', 'application/json');
 
+      //creates a callback function to refresh list with GET after response is received
+      //this means GET will not fire until the POST request is complete
       const callback = (xhr) => {
         handleResponse(xhr);
+        //checks to be sure no errors happened during POST that would cause issues
         if(xhr.status === 200 || xhr.status === 201 || xhr.status === 204) {
           sendAjax('/getTasks', 'GET');
         }
-      }
-      
+      };
+
+      //calls callback upon load
       xhr.onload = () => callback(xhr);
 
+      //creates string of data from form fields for POST request
       const formData = `task=${taskField.value}&date=${dateField.value}&time=${timeField.value}`;
 
+      //sends form data to the server
       xhr.send(formData);
 
+      //stops form from loading new page
       e.preventDefault();
       return false;
     };
 
+    //function to delete a task
     const postDelete = (method, url, key) => {
+      //creates a new xhr request
       const xhr = new XMLHttpRequest();
       xhr.open(method, url);
 
-      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      //set headers
       xhr.setRequestHeader('Accept', 'application/json');
 
+      //creates string of data from parameter for POST delete request
       const deleteData = `task=${key}`;
 
+      //calls handleResponse upon load
       xhr.onload = () => handleResponse(xhr);
+
+      //sends deletion data to the server
       xhr.send(deleteData);
     };
 
-    const postOrder =  (method, url, value) => {
+    //handler function that sends xhr response for each type of sort
+    const getOrder =  (method, url) => {
+      //creates a new xhr request
       const xhr = new XMLHttpRequest();
       xhr.open(method, url);
 
-      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      //set headers
       xhr.setRequestHeader('Accept', 'application/json');
 
-      const orderData = `order=${value}`;
-
+      //calls handleResponse upon load
       xhr.onload = () => handleResponse(xhr);
-      xhr.send(orderData);
-    };
 
-    const sendAjax = (url, method) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open(method, url);
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.onload = () => handleResponse(xhr);
+      //sends request to the server
       xhr.send();
     };
 
+    //basic GET function
+    const sendAjax = (url, method) => {
+      //creates a new xhr request
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url);
+
+      //set headers
+      xhr.setRequestHeader('Accept', 'application/json');
+
+      //calls handleResponse upon load
+      xhr.onload = () => handleResponse(xhr);
+
+      //sends request to the server
+      xhr.send();
+    };
+
+    //init function
     const init = () => {
+      //gets taskForm from html elements
       const taskForm = document.querySelector('#taskForm');
+
+      //handler function to send POST from form
       const addTask = (e) => {
         sendPost(e, taskForm);
       };
 
+      //form event listener
       taskForm.addEventListener('submit', addTask);
 
+      //gets both sorting buttons from html elements
       const createSortButton = document.querySelector('#dateCreated');
       const dateSortButton = document.querySelector('#dateDue');
 
+      //handler function for sorting buttons
       const handleSort = (e) => {
         const target = e.target;
+        //sens correct sort url based on target button ID
         if(target.id === "dateCreated"){
-          postOrder('POST', '/orderTasks', 0);
+          getOrder('GET', '/getTasks?order=created');
         }
         else{
-          postOrder('POST', '/orderTasks', 1);
+          getOrder('GET', '/getTasks?order=date');
         }
       };
 
+      //sorting buttons event listeners
       dateSortButton.addEventListener('click', handleSort);
       createSortButton.addEventListener('click', handleSort);
 
+      //gets a list of all inputs and tags from the page
       const inputs = document.querySelectorAll('.form-control');
       const inputTags = document.querySelectorAll('.input-group-text');
+
+      //gets style button from html elements
       const styleButton = document.querySelector('#styleButton');
 
+      //style string
       let style = "Dark Mode";
 
+      //sets style button equal to not active style mode
       styleButton.value = style;
 
+      //function to change style
       const changeStyle = (e) => {
+        //gets a list of all buttons from the page
         const buttons = document.querySelectorAll('.btn');
 
+        //checks which style to change to
         if(styleButton.value === "Light Mode"){
+          //adjusts background color and font color
           document.body.style.backgroundColor = '#FFFFFF';
           document.body.style.color = '#000000';
 
           for(let i = 0; i < buttons.length; i++){
+            //checks for one specific "button" to only change specific styles
             if(buttons[i].id === "dateLabel"){
               buttons[i].classList.remove("border-light");
               buttons[i].classList.add("border-dark");
               buttons[i].style.color ='#000000';
             }
+            //checks for a certain type of button to add/remove additional styling
             else if(buttons[i].classList.contains("taskButton")){
               buttons[i].classList.remove("btn-outline-success");
               buttons[i].classList.add("btn-outline-primary");
               buttons[i].classList.remove("border-light");
               buttons[i].classList.add("border-dark");
             }
+            //changes remaining button styling
             else{
               buttons[i].classList.remove("btn-success");
               buttons[i].classList.add("btn-primary");
             }
           }
 
+          //changes styling of inputs to match
           for(let i = 0; i < inputs.length; i++){
             inputs[i].style.backgroundColor = '#FFFFFF';
             inputs[i].style.color ='#495057';
@@ -209,10 +283,12 @@
             inputTags[i].style.color = '#495057'
           }
 
+          //restes style string and button value
           style = "Dark Mode";
           styleButton.value = style;
         }
         else{
+          //"Dark Mode" styling
           document.body.style.backgroundColor = '#2b2b2b';
           document.body.style.color = '#bbbbbb';
 
@@ -246,6 +322,7 @@
         }
       };
 
+      //change style event listener
       styleButton.addEventListener('click', changeStyle);
     };
 
@@ -255,31 +332,41 @@
 <body>
   <section id="top">
     <h3 id="title">Lister</h3>
+    <!-- Task Form -->
     <form id="taskForm"action="/addTask" method="post">
       <div class="w-25 input-group mb-3 mx-auto">
+        <!-- Task label -->
         <div class="input-group-prepend">
           <span class="input-group-text" id="basic-addon1">Task:</span>
         </div>
+        <!-- Task input -->
         <input id="taskField" class="form-control" type="text" name="task" />
       </div>
 
       <div class="w-25 input-group mb-3 mx-auto">
         <div class="input-group-prepend">
+          <!-- Date label -->
           <span class="input-group-text" id="basic-addon2">Date:</span>
         </div>
+        <!-- Date input -->
         <input id="dateField" class="form-control" type="date" name="date" step="1"/>
       </div>
 
       <div class="w-25 input-group mb-3 mx-auto">
         <div class="input-group-prepend">
+          <!-- Time label -->
           <span class="input-group-text" id="basic-addon2">Time:</span>
         </div>
+        <!-- Time input -->
         <input id="timeField" class="form-control" type="time" name="time" step="1"/>
       </div>
 
+      <!-- Submit button -->
       <input id="taskSubmit" class="btn btn-primary" type="submit" value="Add Task" />
 
+      <!-- Sorting buttons -->
       <div id="sortButtons" class="btn-group btn-group-toggle" data-toggle="buttons">
+        <!-- This button element is disabled and fires no events, meant to act as a stylized label -->
         <label class="btn border-dark" id="dateLabel" disabled>
           <input type="radio" name="options" autocomplete="off"> Sort By:
         </label>
@@ -291,6 +378,7 @@
         </label>
       </div>
 
+      <!-- Style button -->
       <input id="styleButton" class="btn btn-primary" type="button" value="" />
     </form>
   </section>

@@ -6,9 +6,9 @@ const jsonHandler = require('./jsonResponses');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
-// TODO:
-
 const handlePost = (request, response, parsedUrl) => {
+  // handles all POST requests using body params
+
   const res = response;
 
   const body = [];
@@ -26,21 +26,21 @@ const handlePost = (request, response, parsedUrl) => {
   request.on('end', () => {
     const bodyString = Buffer.concat(body).toString();
     const bodyParams = query.parse(bodyString);
+    // only POST options are to add or remove a task
     if (parsedUrl.pathname === '/addTask') {
       jsonHandler.addTask(request, res, bodyParams);
     } else if (parsedUrl.pathname === '/deleteTask') {
       jsonHandler.deleteTask(request, res, bodyParams);
-    } else if (parsedUrl.pathname === '/orderTasks') {
-      jsonHandler.orderTasks(request, res, bodyParams);
     }
   });
 };
 
-const handleGet = (request, response, parsedUrl) => {
+const handleGet = (request, response, parsedUrl, params) => {
+  // GET goes to index, getData, style, or not found
   if (parsedUrl.pathname === '/') {
     htmlHandler.getIndex(request, response);
   } else if (parsedUrl.pathname === '/getTasks') {
-    jsonHandler.getTasks(request, response);
+    jsonHandler.getTasks(request, response, params);
   } else if (parsedUrl.pathname === '/style.css') {
     htmlHandler.getCSS(request, response);
   } else {
@@ -50,11 +50,13 @@ const handleGet = (request, response, parsedUrl) => {
 
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);
+  const params = query.parse(parsedUrl.query);
 
   if (request.method === 'POST') {
     handlePost(request, response, parsedUrl);
   } else {
-    handleGet(request, response, parsedUrl);
+    // passes in params for sorting through GET
+    handleGet(request, response, parsedUrl, params);
   }
 };
 
