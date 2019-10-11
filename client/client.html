@@ -14,7 +14,6 @@
     //TODO:
     // - Hi Austin, hope you had a good birthday :)
     // --- Extra ---
-    // - animation
     // - Cookies/same user
 
     //function to parse xhr response
@@ -47,6 +46,7 @@
 
             //creates a new html element for each task with an id of the task name
             const taskBox = document.createElement('div');
+            //assigns starting class based on current styling
             taskBox.className = "taskBox";
             if (style === "Light Mode") {
               taskBox.classList.add('taskBoxDark');
@@ -56,6 +56,8 @@
             taskBox.id = obj.tasks[task].task;
             //adds new html element to task container element
             taskList.appendChild(taskBox);
+            const newLine = document.createElement("BR");
+            taskList.appendChild(newLine);
 
             //creates a button within task html element
             const button = document.createElement('BUTTON');
@@ -257,6 +259,8 @@
       const changeStyle = (e) => {
         //gets a list of all buttons from the page
         const buttons = document.querySelectorAll('.btn');
+        //gets a list of all individual task elements from the page
+        const taskBoxes = document.querySelectorAll('.taskBox');
 
         //checks which style to change to
         if(styleButton.value === "Light Mode"){
@@ -293,6 +297,12 @@
             inputTags[i].style.color = '#495057'
           }
 
+          //changes the task styling to match
+          for(let i = 0; i < taskBoxes.length; i++){
+            taskBoxes[i].classList.remove('taskBoxDark');
+            taskBoxes[i].classList.add('taskBoxLight');
+          }
+
           //restes style string and button value
           style = "Dark Mode";
           styleButton.value = style;
@@ -325,6 +335,11 @@
             inputs[i].style.color ='#bbbbbb';
             inputTags[i].style.backgroundColor = '#323232';
             inputTags[i].style.color = '#bbbbbb'
+          }
+
+          for(let i = 0; i < taskBoxes.length; i++){
+            taskBoxes[i].classList.remove('taskBoxLight');
+            taskBoxes[i].classList.add('taskBoxDark');
           }
 
           style = "Light Mode";

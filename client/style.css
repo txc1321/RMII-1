@@ -31,12 +31,32 @@ html, body {
 }
 
 .taskBox{
-  padding: 10px;
-  margin-bottom: 10px;
+  display: inline-block;
+  padding: 5px;
+  margin: 5px;
+  transition: all 0.25s ease-in;
 }
 
+/*Hover styling for tasks*/
+.taskBoxLight{
+  color: inherit;
+}
+
+.taskBoxDark{
+  color: inherit;
+}
+
+.taskBoxLight:hover{
+  color: #007bff;
+}
+
+.taskBoxDark:hover{
+  color: #28a745;
+}
+
+/*Delete animation for tasks*/
 .taskBox.active{
-  animation-duration: 1.0s;
+  animation-duration: 0.75s;
   animation-name: slideacross;
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
@@ -44,10 +64,12 @@ html, body {
 
 @keyframes slideacross{
   from{
+    background-color: inherit;
     color: inherit;
   }
   to{
-    color: #959595;
+    background-color: transparent;
+    color: transparent;
   }
 }
 
