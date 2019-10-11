@@ -135,18 +135,16 @@ const getTasks = (request, response, params) => {
 
     // calls orderTasks based on url params
     if (params.order === 'created') {
-      orderTasks(request, response, 0);
-    } else {
-      orderTasks(request, response, 1);
+      return orderTasks(request, response, 0);
     }
-  } else {
-    // Check for HEAD request
-    if (request.method === 'HEAD') {
-      return respondMeta(request, response, 200);
-    }
-
-    return respondJSON(request, response, 200, responseJSON);
+    return orderTasks(request, response, 1);
   }
+  // Check for HEAD request
+  if (request.method === 'HEAD') {
+    return respondMeta(request, response, 200);
+  }
+
+  return respondJSON(request, response, 200, responseJSON);
 };
 
 // notFound function for any pages not explicitly listed
