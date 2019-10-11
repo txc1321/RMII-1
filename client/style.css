@@ -31,7 +31,24 @@ html, body {
 }
 
 .taskBox{
+  padding: 10px;
   margin-bottom: 10px;
+}
+
+.taskBox.active{
+  animation-duration: 1.0s;
+  animation-name: slideacross;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+}
+
+@keyframes slideacross{
+  from{
+    color: inherit;
+  }
+  to{
+    color: #959595;
+  }
 }
 
 #refreshButton{

@@ -43,9 +43,16 @@
 
           //for..ins through the tasks from the response
           for (let task in obj.tasks) {
+            const style = document.querySelector('#styleButton').value;
+
             //creates a new html element for each task with an id of the task name
             const taskBox = document.createElement('div');
             taskBox.className = "taskBox";
+            if (style === "Light Mode") {
+              taskBox.classList.add('taskBoxDark');
+            } else {
+              taskBox.classList.add('taskBoxLight');
+            }
             taskBox.id = obj.tasks[task].task;
             //adds new html element to task container element
             taskList.appendChild(taskBox);
@@ -55,7 +62,6 @@
             button.className = "taskButton";
 
             //styles button based on current style setting
-            const style = document.querySelector('#styleButton').value;
             if (style === "Light Mode") {
               button.classList.add('btn', 'btn-outline-success', 'border', 'border-light');
             } else {
@@ -63,7 +69,11 @@
             }
 
             //adds a listener to the button to remove the item if clicked
-            button.addEventListener('click', removeTask = () => {
+            button.addEventListener('click', () => {
+                button.parentNode.classList.toggle('active');
+            });
+            taskBox.addEventListener('animationend', removeTask = () => {
+              button.parentNode.classList.remove('active');
               //removes from local json
               delete obj.tasks[button.parentNode.id];
               //sends POST request to the server to delete item
